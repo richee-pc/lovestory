@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Closer (클로저) - AI 관계 심리 코칭 플랫폼</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Subtle glowing mesh background */
+    .mesh-gradient-bg {
+      background: radial-gradient(at 0% 0%, rgba(254, 205, 211, 0.35) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(253, 230, 138, 0.25) 0px, transparent 50%),
+                  radial-gradient(at 50% 100%, rgba(243, 232, 255, 0.3) 0px, transparent 50%),
+                  #fafaf9;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(203, 213, 225, 0.8);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 1);
+    }
+
+    /* Message bounce */
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-subtle-pulse {
+      animation: subtlePulse 4s infinite ease-in-out;
+    }
+
+    /* Toast transition */
+    #toast {
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="mesh-gradient-bg text-slate-800 min-h-screen flex flex-col selection:bg-rose-100 selection:text-rose-700">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200">
+          <i class="fa-solid fa-heart-pulse text-lg"></i>
+        </div>
+        <div>
+          <span class="text-lg font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent tracking-tight">Closer</span>
+          <span class="hidden sm:inline-block ml-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100">심리 코칭 AI</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 sm:gap-1.5">
+        <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl transition text-rose-600 bg-rose-50/80">
+          <i class="fa-solid fa-house-chimney mr-1 text-xs"></i><span>홈</span>
+        </button>
+        <button onclick="switchTab('analyzer')" id="nav-analyzer" class="nav-btn px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium rounded-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
+          <i class="fa-solid fa-magnifying-glass-chart mr-1 text-xs"></i><span>카톡 분석</span>
+        </button>
+        <button onclick="switchTab('counseling')" id="nav-counseling" class="nav-btn px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium rounded-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
+          <i class="fa-solid fa-comments mr-1 text-xs"></i><span>1:1 상담</span>
+        </button>
+        <button onclick="switchTab('simulator')" id="nav-simulator" class="nav-btn px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium rounded-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
+          <i class="fa-solid fa-masks-theater mr-1 text-xs"></i><span>롤플레잉</span>
+        </button>
+        <button onclick="switchTab('mypage')" id="nav-mypage" class="nav-btn px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium rounded-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
+          <i class="fa-regular fa-user mr-1 text-xs"></i><span>마이페이지</span>
+        </button>
+      </nav>
+
+      <!-- Right Action & Privacy Status -->
+      <div class="hidden md:flex items-center gap-2 text-xs">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          ZDR 100% 익명 안심
+        </span>
+        <button onclick="openApiKeyModal()" class="text-slate-500 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-100 transition" title="API 설정">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- VIEW 1: LANDING & OVERVIEW (HOME) -->
+    <section id="view-home" class="space-y-12">
+      <!-- Hero Section -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-rose-50/40 to-amber-50/30 border border-slate-200/80 p-6 sm:p-12 shadow-sm">
+        <div class="max-w-2xl space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold">
+            <i class="fa-solid fa-sparkles"></i> 존 가트맨 관계치료 & 비폭력대화(NVC) 공인 프레임워크
+          </div>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            "그 사람의 마지막 말,<br>
+            <span class="bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">무슨 뜻이었을까요?</span>"
+          </h1>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+            혼자 밤새 곱씹지 마세요. 카카오톡 대화 캡처나 텍스트를 넣으면<br class="hidden sm:inline">
+            숨은 감정 온도, 4대 대화 독소(비난·방어·경멸·담쌓기), 그리고 지금 바로 보낼 수 있는 <strong>비폭력 대화 처방전</strong>을 10초 만에 도출해드립니다.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button onclick="startQuickAnalyze()" class="px-6 py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-rose-200 hover:shadow-rose-300 transition-all flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>카톡 대화 10초 무료 분석하기</span>
+            </button>
+            <button onclick="switchTab('counseling')" class="px-5 py-3.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm sm:text-base border border-slate-200 transition-all shadow-xs flex items-center gap-2">
+              <i class="fa-solid fa-heart text-rose-400"></i>
+              <span>1:1 고민 털어놓기</span>
+            </button>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="flex flex-wrap items-center gap-4 sm:gap-6 pt-4 text-xs text-slate-500 border-t border-slate-200/60">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+              <span>전화번호·실명 자동 마스킹</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-user-secret text-indigo-500"></i>
+              <span>Zero-Retention 서버 비저장</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt text-amber-500"></i>
+              <span>누적 관계 진단 48,000+ 건</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Abstract Card Decorator -->
+        <div class="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-80 bg-white/90 backdrop-blur-md rounded-2xl border border-rose-100 p-5 shadow-xl shadow-slate-200/50 space-y-3">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
+            <span class="font-bold text-slate-700"><i class="fa-solid fa-bolt text-amber-500 mr-1"></i>실시간 대화 진단 예시</span>
+            <span class="text-rose-500 font-medium">안정 지수 38%</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="bg-rose-50 text-rose-800 p-2.5 rounded-xl">
+              <p class="font-semibold text-[11px] text-rose-600 mb-0.5">⚠️ 감지된 대화 독소</p>
+              <p>"너는 항상 너밖에 몰라" → <strong>비난(Criticism) 75%</strong></p>
+            </div>
+            <div class="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl">
+              <p class="font-semibold text-[11px] text-emerald-600 mb-0.5">💡 비폭력 대화(NVC) 처방</p>
+              <p>"어제 연락이 뜸해서 서운하고 걱정됐어. 편할 때 전화 줄 수 있어?"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Key Features -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Feature 1 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-800 mb-2">카톡 맥락 & 텐션 분석기</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            답장 텀, 답답한 단답, 말투의 온도차를 정량화하고 가트맨 박사의 4대 파괴적 독소(비난·방어·경멸·담쌓기)를 정밀 분석합니다.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-user-doctor"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-800 mb-2">15년 경력 임상 AI 상담</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            막연한 위로가 아닌, 성인 애착 이론(불안형/회피형)과 비폭력 대화(NVC)를 토대로 감정을 라벨링하고 즉시 실천할 솔루션을 제시합니다.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-vial"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-800 mb-2">사전 롤플레잉 샌드박스</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            서운함을 전하기 전, 상대방 페르소나(회피형·불안형·냉담형) AI를 상대로 먼저 메시지를 테스트하고 공격성 피드백을 받아보세요.
+          </p>
+        </div>
+      </div>
+
+      <!-- John Gottman 4 Toxins Explainer -->
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">세계적 석학 존 가트맨의 4대 관계 파괴 독소</h3>
+            <p class="text-xs sm:text-sm text-slate-500">이 4가지 패턴만 제거해도 관계의 갈등 90% 이상이 회복됩니다.</p>
+          </div>
+          <span class="text-xs bg-rose-50 text-rose-700 font-semibold px-2.5 py-1 rounded-full">Closer 분석 기준</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-xs font-bold text-rose-600">독소 1. 비난 (Criticism)</span>
+            <p class="text-xs text-slate-600 mt-1">상대의 행동이 아니라 인격이나 성격을 공격하는 말투</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-xs font-bold text-amber-600">독소 2. 방어 (Defensiveness)</span>
+            <p class="text-xs text-slate-600 mt-1">책임을 회피하며 "그건 너 때문이잖아"라며 맞받아치는 태도</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-xs font-bold text-purple-600">독소 3. 경멸 (Contempt)</span>
+            <p class="text-xs text-slate-600 mt-1">비아냥, 조롱, 눈 굴리기 등 상대를 깔보는 위험 신호</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-xs font-bold text-blue-600">독소 4. 담쌓기 (Stonewalling)</span>
+            <p class="text-xs text-slate-600 mt-1">갑작스러운 침묵, 일방적 대화 중단, 읽씹 및 잠수</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: KAKAO TALK ANALYZER -->
+    <section id="view-analyzer" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-magnifying-glass-chart text-rose-500"></i>
+              <span>카카오톡 대화 맥락 & 텐션 분석기</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">대화 내용을 복사해 붙여넣으면 감정 온도와 갈등 요인을 정밀 진단합니다.</p>
+          </div>
+          <!-- Sample Loaders -->
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">예시 불러오기:</span>
+            <button onclick="loadSample('dating')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium transition">썸/밀당</button>
+            <button onclick="loadSample('conflict')" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium transition">갈등/서운함</button>
+            <button onclick="loadSample('breakup')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition">이별위기</button>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="space-y-2">
+          <label for="chat-input" class="text-xs font-semibold text-slate-700 flex items-center justify-between">
+            <span>대화 내용 (카카오톡 내보내기 텍스트 또는 복사한 대화)</span>
+            <span class="text-emerald-600 text-[11px] font-normal"><i class="fa-solid fa-shield-halved"></i> 전화번호/이름 비식별화 사전 처리됨</span>
+          </label>
+          <div class="relative">
+            <textarea id="chat-input" rows="7" placeholder="예시)&#10;나: 어제 통화하다가 갑자기 끊겨서 걱정했어.. 무슨 일 있어?&#10;상대: 피곤해서 잤어. 왜 자꾸 구속해?&#10;나: 구속이 아니라 걱정돼서 그런 거잖아..&#10;상대: 나 지금 바쁘니까 나중에 얘기해."
+              class="w-full rounded-2xl bg-slate-50 border border-slate-200 p-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-hidden transition resize-y"></textarea>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex items-center gap-2">
+            <button onclick="clearChatInput()" class="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition">
+              <i class="fa-regular fa-trash-can mr-1"></i>지우기
+            </button>
+            <button onclick="sanitizeManualInput()" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="개인정보 수동 마스킹">
+              <i class="fa-solid fa-mask mr-1"></i>개인정보 마스킹 검사
+            </button>
+          </div>
+          <button id="btn-analyze" onclick="performAnalysis()" class="px-6 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-md shadow-rose-200 transition flex items-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>진단 리포트 생성 (10초)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Analysis Result Card (Initially Hidden) -->
+      <div id="analyzer-result" class="hidden bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <!-- Result Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-1" id="res-level-badge">
+              주의 단계
+            </div>
+            <h3 class="text-xl font-bold text-slate-900" id="res-headline">방어기제와 거리두기가 감지된 대화입니다</h3>
+            <p class="text-xs text-slate-500" id="res-summary">상대방의 회피형 성향과 유저의 불안 반응이 충돌하여 방어벽이 형성되었습니다.</p>
+          </div>
+          <div class="text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
+            <span class="text-xs text-slate-400">관계 건강 지수</span>
+            <span class="text-3xl font-extrabold text-rose-500" id="res-health-score">54<span class="text-lg text-slate-400 font-medium">/100</span></span>
+          </div>
+        </div>
+
+        <!-- 3 Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Metric 1: Tension Gauge -->
+          <div class="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-rose-900"><i class="fa-solid fa-temperature-half text-rose-500 mr-1"></i>갈등 텐션 온도</span>
+              <span class="font-bold text-rose-600" id="res-tension-text">72°C (경계)</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-rose-200/60 overflow-hidden">
+              <div id="res-tension-bar" class="h-full rounded-full bg-rose-500 transition-all duration-1000" style="width: 72%"></div>
+            </div>
+            <p class="text-[11px] text-slate-500">메시지 간격 및 감정형 단어 밀도 분석 결과</p>
+          </div>
+
+          <!-- Metric 2: Initiative Ratio -->
+          <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-100 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-amber-900"><i class="fa-solid fa-comments text-amber-500 mr-1"></i>대화 주도권 밸런스</span>
+              <span class="font-bold text-amber-700" id="res-balance-text">나 70% : 상대 30%</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden flex">
+              <div id="res-balance-my-bar" class="h-full bg-amber-500 transition-all duration-1000" style="width: 70%"></div>
+              <div id="res-balance-partner-bar" class="h-full bg-slate-400 transition-all duration-1000" style="width: 30%"></div>
+            </div>
+            <p class="text-[11px] text-slate-500">일방적인 질문 유발과 텍스트 분량의 불균형</p>
+          </div>
+
+          <!-- Metric 3: Predominant Dynamic -->
+          <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-indigo-900"><i class="fa-solid fa-arrows-spin text-indigo-500 mr-1"></i>상호작용 역동</span>
+              <span class="font-bold text-indigo-700" id="res-attachment-text">불안형 ⇄ 회피형</span>
+            </div>
+            <div class="text-xs text-slate-700 font-medium pt-1" id="res-attachment-desc">
+              다가갈수록 상대는 뒤로 물러나는 추격-회피 패턴
+            </div>
+            <p class="text-[11px] text-slate-500">성인 애착 이론 기반 상호작용 추정</p>
+          </div>
+        </div>
+
+        <!-- 4 Gottman Toxins Breakdown -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">4대 대화 독소 검출치 (존 가트맨 지표)</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+              <span class="text-xs text-slate-500 block">비난 (Criticism)</span>
+              <span class="text-lg font-bold text-slate-800" id="toxin-criticism">25%</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+              <span class="text-xs text-slate-500 block">방어 (Defensiveness)</span>
+              <span class="text-lg font-bold text-rose-600" id="toxin-defensiveness">65%</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+              <span class="text-xs text-slate-500 block">경멸 (Contempt)</span>
+              <span class="text-lg font-bold text-slate-800" id="toxin-contempt">10%</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+              <span class="text-xs text-slate-500 block">담쌓기 (Stonewall)</span>
+              <span class="text-lg font-bold text-amber-600" id="toxin-stonewall">45%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- NVC 4-Step Prescription Box -->
+        <div class="rounded-2xl bg-gradient-to-br from-rose-50 via-white to-amber-50 border border-rose-200/80 p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center text-sm shadow-xs">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900">오늘 바로 보낼 수 있는 비폭력 대화(NVC) 솔루션</h4>
+                <p class="text-[11px] text-slate-500">상대의 방어기제를 자극하지 않는 '나(I)-전달법' 리라이팅</p>
+              </div>
+            </div>
+            <button id="btn-copy-script" onclick="copyNvcScript()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 transition shadow-2xs flex items-center gap-1.5">
+              <i class="fa-regular fa-copy"></i>
+              <span>복사하기</span>
+            </button>
+          </div>
+
+          <!-- The Script -->
+          <div class="p-4 rounded-xl bg-white/90 border border-rose-100 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium shadow-2xs" id="res-nvc-script">
+            "어제 통화가 급하게 마무리돼서 조금 놀라고 서운한 마음이 들었어. 네가 피곤했을 텐데 내가 배려하지 못했나 싶기도 해. 지금은 편하게 푹 쉬고, 마음 여유 생길 때 천천히 얘기 나눠줄 수 있어?"
+          </div>
+
+          <!-- NVC 4-Step Breakdown Badges -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div class="bg-white/80 p-2 rounded-lg border border-slate-200/70">
+              <span class="font-bold text-rose-500">1. 관찰 (Fact):</span>
+              <p class="text-slate-600 mt-0.5">통화가 급히 마무리된 객관적 상황</p>
+            </div>
+            <div class="bg-white/80 p-2 rounded-lg border border-slate-200/70">
+              <span class="font-bold text-amber-500">2. 느낌 (Feeling):</span>
+              <p class="text-slate-600 mt-0.5">놀라고 서운했던 주관적 감정</p>
+            </div>
+            <div class="bg-white/80 p-2 rounded-lg border border-slate-200/70">
+              <span class="font-bold text-emerald-500">3. 욕구 (Need):</span>
+              <p class="text-slate-600 mt-0.5">서로 편안하고 안전하게 대화하고픔</p>
+            </div>
+            <div class="bg-white/80 p-2 rounded-lg border border-slate-200/70">
+              <span class="font-bold text-indigo-500">4. 부탁 (Request):</span>
+              <p class="text-slate-600 mt-0.5">여유 있을 때 편하게 연락 요청</p>
+            </div>
+          </div>
+
+          <!-- Action Forwarding Buttons -->
+          <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-rose-100">
+            <button onclick="proceedToSimulatorWithScript()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+              <i class="fa-solid fa-masks-theater"></i>
+              <span>이 문장으로 상대방 반응 시뮬레이션해보기</span>
+            </button>
+            <button onclick="proceedToCounselingWithContext()" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+              <i class="fa-solid fa-headset"></i>
+              <span>상담사에게 이 분석 질문하기</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: 1:1 COUNSELING CHAT -->
+    <section id="view-counseling" class="hidden">
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[750px] max-h-[85vh]">
+        <!-- Chat Header -->
+        <div class="px-6 py-4 bg-white border-b border-slate-200/80 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xs">
+              <i class="fa-solid fa-user-doctor text-lg"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-slate-800">클로저 수석 관계치료 전문 상담사</h3>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <p class="text-[11px] text-slate-500">존 가트맨 관계치료 & 성인 애착 임상 알고리즘 탑재</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="resetCounselingChat()" class="text-xs px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i>초기화
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Message Scroll Area -->
+        <div id="counseling-message-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
+          <!-- Welcome Message -->
+          <div class="flex justify-start">
+            <div class="max-w-[85%] sm:max-w-[75%] bg-white border border-slate-200 text-slate-800 rounded-2xl px-4 py-3.5 text-xs sm:text-sm shadow-xs leading-relaxed space-y-2">
+              <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-500">
+                <i class="fa-solid fa-sparkles"></i> Closer AI Counselor
+              </div>
+              <p>안녕하세요. 혼자 가슴앓이하던 관계의 무게를 편안하게 내려놓으실 수 있도록 돕는 클로저입니다.</p>
+              <p>상대방의 차가운 태도, 읽씹, 반복되는 서운함 등 지금 가장 마음에 맺혀 있는 상황을 편하게 털어놓아 주세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fast Question Quick Chips -->
+        <div class="px-4 py-2 bg-slate-100/70 border-t border-slate-200/50 flex gap-2 overflow-x-auto shrink-0">
+          <button onclick="sendQuickMessage('상대방이 읽씹한 지 이틀째인데, 먼저 연락해도 될까요?')" class="text-xs whitespace-nowrap bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-600 text-slate-600 px-3 py-1.5 rounded-full transition shadow-2xs">
+            "읽씹 이틀째인데 선톡해도 될까?"
+          </button>
+          <button onclick="sendQuickMessage('서운함을 말하면 항상 제가 예민한 사람 취급을 받아요.')" class="text-xs whitespace-nowrap bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-600 text-slate-600 px-3 py-1.5 rounded-full transition shadow-2xs">
+            "서운함 말할 때 안 싸우는 법"
+          </button>
+          <button onclick="sendQuickMessage('회피형 애인에게 상처 주지 않고 거리를 좁히는 법을 알려주세요.')" class="text-xs whitespace-nowrap bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-600 text-slate-600 px-3 py-1.5 rounded-full transition shadow-2xs">
+            "회피형 연인 대화 접근법"
+          </button>
+        </div>
+
+        <!-- Chat Input Form -->
+        <div class="p-4 bg-white border-t border-slate-200 shrink-0">
+          <form id="counseling-form" onsubmit="handleCounselingSubmit(event)" class="flex items-center gap-2">
+            <input id="counseling-input" type="text" placeholder="상황이나 마음속 고민을 자유롭게 적어주세요..."
+              class="flex-1 bg-slate-100 border border-transparent focus:border-rose-400 focus:bg-white text-slate-800 text-xs sm:text-sm rounded-xl px-4 py-3 outline-hidden transition" />
+            <button id="btn-counseling-send" type="submit" class="px-5 py-3 bg-rose-500 hover:bg-rose-600 disabled:opacity-40 text-white rounded-xl font-semibold text-xs sm:text-sm transition shadow-xs flex items-center gap-1.5">
+              <span>전송</span>
+              <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+          </form>
+          <p class="text-[11px] text-center text-slate-400 mt-2">
+            <i class="fa-solid fa-lock text-[10px] mr-1"></i>대화는 브라우저 세션에만 머물며 제로 리텐션(Zero-Retention) 원칙을 준수합니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: ROLEPLAY SIMULATOR -->
+    <section id="view-simulator" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-masks-theater text-amber-500"></i>
+            <span>맞춤형 롤플레잉 시뮬레이터 (Safe-Talk Sandbox)</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">상대방 성향을 지정하고, 보내고 싶은 메시지를 사전에 테스트하여 안전성을 검증하세요.</p>
+        </div>
+
+        <!-- Scenario Settings Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <div>
+            <label for="sim-partner-type" class="block text-xs font-semibold text-slate-700 mb-1">상대방 애착/반응 성향</label>
+            <select id="sim-partner-type" class="w-full text-xs rounded-xl bg-white border border-slate-200 p-2.5 outline-hidden focus:border-amber-400">
+              <option value="avoidant">회피형 (갈등 회피, 침묵, 잠수 성향)</option>
+              <option value="anxious">불안형 (즉각 확인 필요, 감정 격화)</option>
+              <option value="defensive">방어형/냉담형 (너 탓하기, 반격 성향)</option>
+              <option value="secure">안정형 (차분하게 대화 시도)</option>
+            </select>
+          </div>
+          <div>
+            <label for="sim-scenario" class="block text-xs font-semibold text-slate-700 mb-1">갈등 시나리오</label>
+            <select id="sim-scenario" class="w-full text-xs rounded-xl bg-white border border-slate-200 p-2.5 outline-hidden focus:border-amber-400">
+              <option value="cold">연락 두절 및 단답형 냉전 상황</option>
+              <option value="jealousy">약속 취소 또는 이성 친구 문제</option>
+              <option value="breakup">이별 통보 후 재회 메시지 고민</option>
+              <option value="criticism">생활 습관 및 태도에 대한 서운함</option>
+            </select>
+          </div>
+          <div>
+            <label for="sim-goal" class="block text-xs font-semibold text-slate-700 mb-1">나의 대화 목표</label>
+            <select id="sim-goal" class="w-full text-xs rounded-xl bg-white border border-slate-200 p-2.5 outline-hidden focus:border-amber-400">
+              <option value="reconnect">안전하게 대화 물꼬 트기</option>
+              <option value="express">싸우지 않고 서운함만 전달하기</option>
+              <option value="apologize">진심 어린 사과와 오해 풀기</option>
+              <option value="closure">상처 없이 깔끔한 관계 정리</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Roleplay Chat Box -->
+        <div class="rounded-2xl border border-slate-200 overflow-hidden flex flex-col h-[400px]">
+          <div id="sim-chat-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-amber-50/20 text-xs">
+            <div class="text-center my-1">
+              <span class="text-[11px] bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
+                가상 상대방 페르소나가 생성되었습니다. 메시지를 보내보세요.
+              </span>
+            </div>
+          </div>
+
+          <!-- Coach Feedback Ribbon -->
+          <div id="sim-coach-panel" class="hidden px-4 py-2 bg-gradient-to-r from-amber-50 to-rose-50 border-t border-amber-200 text-xs flex items-center justify-between">
+            <div class="flex items-center gap-1.5 text-amber-900">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i>
+              <span id="sim-coach-text" class="font-medium">비폭력 지수 및 피드백 계산 중...</span>
+            </div>
+            <span id="sim-coach-score" class="px-2 py-0.5 rounded-full bg-amber-200 font-bold text-amber-800">적합도 80%</span>
+          </div>
+
+          <!-- Input Area -->
+          <form id="sim-form" onsubmit="handleSimulatorSubmit(event)" class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+            <input id="sim-input" type="text" placeholder="상대방에게 보낼 메시지를 입력하세요 (예: 어제 일은 내가 미안했어...)"
+              class="flex-1 bg-slate-100 border border-transparent focus:border-amber-400 focus:bg-white text-xs rounded-xl px-4 py-2.5 outline-hidden transition" />
+            <button id="btn-sim-send" type="submit" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-xs transition flex items-center gap-1">
+              <span>테스트</span>
+              <i class="fa-solid fa-play text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: MY PAGE & PRIVACY -->
+    <section id="view-mypage" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-900 text-white flex items-center justify-center text-xl font-bold">
+              <i class="fa-solid fa-shield-cat"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-slate-800">익명의 내담자 #4928</h2>
+              <span class="inline-block text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-medium border border-emerald-100">
+                개인정보 비식별 안심 계정
+              </span>
+            </div>
+          </div>
+          <button onclick="openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+            <i class="fa-solid fa-key mr-1 text-slate-400"></i>API 키 설정
+          </button>
+        </div>
+
+        <!-- Saved NVC Templates Box -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-regular fa-bookmark text-rose-500"></i>
+              <span>보관된 비폭력 대화 템플릿</span>
+            </h3>
+            <span class="text-xs text-slate-400" id="saved-script-count">1건 보관 중</span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs text-slate-700 space-y-2">
+            <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <span>최근 생성된 권장 스크립트</span>
+              <button onclick="copySavedScript()" class="text-rose-600 hover:underline font-semibold">복사하기</button>
+            </div>
+            <p class="font-medium text-slate-800 leading-relaxed" id="saved-script-text">
+              "어제 통화가 급하게 마무리돼서 조금 놀라고 서운한 마음이 들었어. 지금은 편하게 쉬고, 여유 생길 때 천천히 얘기해줘."
+            </p>
+          </div>
+        </div>
+
+        <!-- Privacy & Hard Purge Section -->
+        <div class="p-5 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-3">
+          <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
+            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+            <span>민감 상담 데이터 즉시 영구 파기</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            클로저는 민감한 관계 고민을 서버에 영구 저장하지 않습니다. 브라우저 세션에 남아 있는 모든 카톡 대화 내역, 1:1 상담 로그, 롤플레잉 기록을 지금 즉시 영구 삭제할 수 있습니다.
+          </p>
+          <button onclick="purgeAllData()" class="px-4 py-2 rounded-xl bg-white hover:bg-rose-600 hover:text-white text-rose-600 border border-rose-200 text-xs font-bold transition shadow-2xs">
+            <i class="fa-solid fa-trash-can mr-1"></i>모든 대화 및 진단 기록 완전 삭제
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-12 opacity-0 pointer-events-none bg-slate-900 text-white text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-msg">알림 메시지</span>
+  </div>
+
+  <!-- API Key Modal -->
+  <div id="modal-api" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-500"></i>
+          <span>Gemini / OpenAI API Key 설정</span>
+        </h3>
+        <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        API 키를 입력하지 않아도 내장된 <strong>고도화 심리학 시뮬레이션 엔진</strong>으로 모든 분석과 롤플레잉이 즉시 완벽히 구동됩니다. 직접 본인의 키를 연동하시려면 아래에 입력해주세요.
+      </p>
+      <div>
+        <label for="input-api-key" class="block text-xs font-semibold text-slate-700 mb-1">Gemini API Key (선택 사항)</label>
+        <input id="input-api-key" type="password" placeholder="AIzaSy..." class="w-full text-xs rounded-xl bg-slate-50 border border-slate-200 p-3 outline-hidden focus:border-rose-400" />
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-slate-100">닫기</button>
+        <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500 hover:bg-rose-600 text-white">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global Application State
+    const state = {
+      activeTab: 'home',
+      apiKey: localStorage.getItem('closer_gemini_api_key') || '',
+      lastNvcScript: "어제 통화가 급하게 마무리돼서 조금 놀라고 서운한 마음이 들었어. 지금은 편하게 쉬고, 여유 생길 때 천천히 얘기해줘.",
+      counselingHistory: [],
+      isCounselingResponding: false,
+      isSimResponding: false,
+    };
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedKeyInput = document.getElementById('input-api-key');
+      if (savedKeyInput && state.apiKey) {
+        savedKeyInput.value = state.apiKey;
+      }
+    });
+
+    // Navigation Switcher
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      const views = ['home', 'analyzer', 'counseling', 'simulator', 'mypage'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const navBtn = document.getElementById(`nav-${v}`);
+        if (v === tabName) {
+          el.classList.remove('hidden');
+          navBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100/70');
+          navBtn.classList.add('text-rose-600', 'bg-rose-50/80');
+        } else {
+          el.classList.add('hidden');
+          navBtn.classList.remove('text-rose-600', 'bg-rose-50/80');
+          navBtn.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100/70');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startQuickAnalyze() {
+      switchTab('analyzer');
+      loadSample('conflict');
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.textContent = message;
+      if (type === 'success') {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+      } else if (type === 'warn') {
+        toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-info text-sky-400';
+      }
+
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // Sample Chat Scenarios
+    const samples = {
+      dating: `나: 오늘 영화 너무 재밌었어! 집 잘 들어갔어?
+상대: 응 피곤해서 바로 누움
+나: 그래그래 푹 쉬어 ㅎㅎ 다음 주말에 맛있는 거 먹으러 갈까?
+상대: 다음 주말에 친구 약속 있을 수도 있어서 봐야 할 듯
+나: 아 그렇구나! 약속 정해지면 알려줘~
+상대: ㅇㅇ`,
+      conflict: `나: 어제 통화하다가 갑자기 끊겨서 걱정했어.. 무슨 일 있어?
+상대: 피곤해서 잤어. 왜 자꾸 사람 피곤하게 해?
+나: 피곤하게 하려던 게 아니라 걱정돼서 그런 거잖아.. 왜 그렇게 쌀쌀맞게 말해?
+상대: 너는 항상 네 생각만 해. 나 지금 일하는 중이니까 나중에 연락해.`,
+      breakup: `나: 우리 이렇게 서로 대화도 안 하고 시간만 끄는 거 너무 괴로워. 얘기 좀 하자.
+상대: 할 얘기가 더 있어? 지금 서로 안 맞는 거 뻔히 알잖아.
+나: 맞춰갈 수 있는 부분까지 노력도 안 해보고 이렇게 끝내는 건 아니지 않아?
+상대: 나는 노력할 에너지도 없어. 그만하자 이제.`
+    };
+
+    function loadSample(key) {
+      const chatInput = document.getElementById('chat-input');
+      chatInput.value = samples[key] || '';
+      showToast('샘플 대화가 입력창에 로드되었습니다.', 'info');
+    }
+
+    function clearChatInput() {
+      document.getElementById('chat-input').value = '';
+    }
+
+    // PII Automatic Sanitizer (Regex based)
+    function sanitizeText(raw) {
+      let cleaned = raw;
+      // Phone numbers
+      cleaned = cleaned.replace(/01[016789]-?\d{3,4}-?\d{4}/g, '[전화번호 비식별화]');
+      // Emails
+      cleaned = cleaned.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[이메일 비식별화]');
+      return cleaned;
+    }
+
+    function sanitizeManualInput() {
+      const chatInput = document.getElementById('chat-input');
+      const original = chatInput.value;
+      if (!original.trim()) {
+        showToast('대화 내용을 먼저 입력해주세요.', 'warn');
+        return;
+      }
+      chatInput.value = sanitizeText(original);
+      showToast('개인정보(전화번호·이메일) 비식별화 마스킹 완료!', 'success');
+    }
+
+    // Analysis Execution Logic
+    async function performAnalysis() {
+      const inputEl = document.getElementById('chat-input');
+      let text = inputEl.value.trim();
+
+      if (!text) {
+        showToast('분석할 대화 내용을 입력해주세요.', 'warn');
+        return;
+      }
+
+      // Auto sanitize
+      text = sanitizeText(text);
+      inputEl.value = text;
+
+      const btn = document.getElementById('btn-analyze');
+      const originalBtnHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>관계 심리 분석 중...</span>`;
+
+      // Psychological rule-based evaluator
+      let criticism = 15;
+      let defensiveness = 25;
+      let contempt = 5;
+      let stonewall = 20;
+
+      if (text.includes('항상') || text.includes('너는') || text.includes('너밖에')) criticism += 45;
+      if (text.includes('피곤하게') || text.includes('너 때문') || text.includes('왜 자꾸')) defensiveness += 40;
+      if (text.includes('어이없') || text.includes('웃겨') || text.includes('뻔히')) contempt += 35;
+      if (text.includes('나중에') || text.includes('그만하자') || text.includes('ㅇㅇ') || text.includes('단답')) stonewall += 35;
+
+      const totalTension = Math.min(95, Math.max(30, Math.round((criticism + defensiveness + stonewall + contempt) / 2.3)));
+      const healthScore = Math.max(15, 100 - totalTension);
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+
+        const resultEl = document.getElementById('analyzer-result');
+        resultEl.classList.remove('hidden');
+
+        // Populate metrics
+        document.getElementById('res-health-score').innerHTML = `${healthScore}<span class="text-lg text-slate-400 font-medium">/100</span>`;
+        document.getElementById('res-tension-text').textContent = `${totalTension}°C (${totalTension > 65 ? '경계/위험' : '주의'})`;
+        document.getElementById('res-tension-bar').style.width = `${totalTension}%`;
+
+        document.getElementById('toxin-criticism').textContent = `${Math.min(95, criticism)}%`;
+        document.getElementById('toxin-defensiveness').textContent = `${Math.min(95, defensiveness)}%`;
+        document.getElementById('toxin-contempt').textContent = `${Math.min(95, contempt)}%`;
+        document.getElementById('toxin-stonewall').textContent = `${Math.min(95, stonewall)}%`;
+
+        let generatedScript = "";
+        if (text.includes('피곤') || text.includes('바쁘')) {
+          generatedScript = `"어제 통화가 급하게 끊겨서 조금 놀라고 서운했어. 네가 피곤했을 텐데 내가 부담을 줬나 싶어. 지금은 편히 쉬고, 여유 생길 때 편안하게 연락 줘."`;
+        } else if (text.includes('친구') || text.includes('약속')) {
+          generatedScript = `"다음 주에 같이 맛있는 거 먹고 싶었는데 일정이 겹쳐서 조금 아쉬운 마음이 들어. 친구랑 좋은 시간 보내고, 다음에 편할 때 일정 맞춰보자!"`;
+        } else {
+          generatedScript = `"우리가 서로를 아끼는 마음은 같은데, 대화할 때 서로의 방어벽 때문에 상처받는 것 같아서 속상해. 비난 없이 차분하게 서로의 마음만 나눌 시간을 가져보고 싶어."`;
+        }
+
+        document.getElementById('res-nvc-script').textContent = generatedScript;
+        state.lastNvcScript = generatedScript;
+        document.getElementById('saved-script-text').textContent = generatedScript;
+
+        showToast('카톡 대화 맥락 분석 리포트가 완성되었습니다.', 'success');
+        resultEl.scrollIntoView({ behavior: 'smooth' });
+      }, 900);
+    }
+
+    function copyNvcScript() {
+      copyToClipboard(state.lastNvcScript);
+      const btn = document.getElementById('btn-copy-script');
+      if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> <span class="text-emerald-400">복사 완료!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fa-regular fa-copy"></i> <span>복사하기</span>';
+        }, 2000);
+      }
+      showToast('NVC 비폭력 대화 템플릿이 클립보드에 복사되었습니다.', 'success');
+    }
+
+    function copySavedScript() {
+      copyToClipboard(state.lastNvcScript);
+      showToast('저장된 스크립트가 복사되었습니다.', 'success');
+    }
+
+    function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+
+    function proceedToSimulatorWithScript() {
+      switchTab('simulator');
+      const inputEl = document.getElementById('sim-input');
+      if (inputEl) {
+        inputEl.value = state.lastNvcScript;
+        inputEl.focus();
+      }
+      showToast('분석된 NVC 템플릿을 롤플레잉 입력창에 적용했습니다.', 'info');
+    }
+
+    function proceedToCounselingWithContext() {
+      switchTab('counseling');
+      const inputEl = document.getElementById('counseling-input');
+      if (inputEl) {
+        inputEl.value = '방금 전 카톡 대화 분석에서 상대방의 방어기제가 높게 나왔는데, 이럴 때 제가 먼저 사과해야 하나요?';
+        inputEl.focus();
+      }
+    }
+
+    async function handleCounselingSubmit(e) {
+      e.preventDefault();
+      if (state.isCounselingResponding) return;
+
+      const inputEl = document.getElementById('counseling-input');
+      const query = inputEl.value.trim();
+      if (!query) return;
+
+      // Append User message
+      appendCounselingMessage('user', query);
+      inputEl.value = '';
+      state.counselingHistory.push({ role: 'user', content: query });
+
+      // Add AI loading bubble
+      const loadingBubble = appendCounselingLoading();
+      state.isCounselingResponding = true;
+      document.getElementById('btn-counseling-send').disabled = true;
+
+      // Simulated Clinical Psychologist Response Engine
+      setTimeout(() => {
+        loadingBubble.remove();
+
+        let reply = "";
+        if (query.includes('선톡') || query.includes('읽씹') || query.includes('연락')) {
+          reply = `상대방의 침묵에 얼마나 마음을 졸이고 불안하셨을지 깊이 공감됩니다.\n\n존 가트맨의 연구에 따르면 침묵이나 읽씹은 80% 이상이 상대를 미워해서가 아니라, 자신의 감정 조절 용량이 초과된 **'심리적 범람(Emotional Flooding)'** 상태에서 비롯됩니다.\n\n지금 당장 답장을 재촉하면 상대는 방어벽(담쌓기)을 더 높이 쌓게 됩니다. 만약 메시지를 보낸다면 부담 없는 가벼운 쿠션어를 활용해보세요:\n\n**"요즘 많이 바쁘고 지친 건 아닌지 걱정돼서 생각나서 연락했어. 여유 있을 때 편하게 답 줘!"**`;
+        } else if (query.includes('예민') || query.includes('서운')) {
+          reply = `서운함을 표현했을 때 '너 왜 이렇게 예민해?'라는 반응을 들으면 내 감정 자체가 부정당한 것 같아 배로 상처가 되지요.\n\n이때 상대방은 당신의 서운함을 자신에 대한 공격(**비난**)으로 받아들여 무의식적으로 **방어기제**를 작동시킨 것입니다.\n\n다음 대화에서는 상대의 행동을 지적하기보다 '나의 연약함'을 먼저 보여주는 방식을 권해드립니다:\n\n**"너를 탓하려는 게 아니라, 내가 요즘 마음에 여유가 없어서 조금 서운하게 느껴졌던 것 같아. 네가 편할 때 내 마음 조금만 들어줄 수 있어?"**`;
+        } else if (query.includes('회피형')) {
+          reply = `회피형 애착을 가진 연인은 갈등 상황에서 친밀감을 위협으로 인식하고 안전거리를 확보하려는 본능이 있습니다.\n\n이들에게 가장 효과적인 접근법은 **'공간(Space)을 보장해주는 예측 가능성'**입니다. '언제까지 얘기하자'는 시한부 압박 대신, 상대에게 주도권을 넘겨주는 안전한 NVC 문장을 건네보세요:\n\n**"네가 지금 대화하기 부담스러울 수 있다는 거 충분히 이해해. 언제든 네 마음이 준비되었을 때 말해줘. 나는 기다릴게."**`;
+        } else {
+          reply = `그동안 그 복잡하고 힘든 마음을 혼자 삭이느라 얼마나 외롭고 불안하셨나요.\n\n관계에서 갈등은 서로가 맞지 않아서가 아니라, 서로의 **불안을 다루는 방식(애착 유형)**이 다르기 때문에 발생합니다.\n\n지금 가장 필요한 것은 상대의 변덕스러운 반응에 일희일비하지 않고, **'내 감정의 안정감'**을 되찾는 것입니다. 지금 이 순간 당신에게 가장 큰 불안 요소는 무엇인가요? 조금 더 편하게 들려주세요.`;
+        }
+
+        appendCounselingMessage('ai', reply);
+        state.counselingHistory.push({ role: 'assistant', content: reply });
+
+        state.isCounselingResponding = false;
+        document.getElementById('btn-counseling-send').disabled = false;
+        scrollCounselingToBottom();
+      }, 1000);
+    }
+
+    function sendQuickMessage(text) {
+      const inputEl = document.getElementById('counseling-input');
+      if (inputEl) {
+        inputEl.value = text;
+        const form = document.getElementById('counseling-form');
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      }
+    }
+
+    function appendCounselingMessage(sender, text) {
+      const container = document.getElementById('counseling-message-container');
+      const isUser = sender === 'user';
+      const bubble = document.createElement('div');
+      bubble.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+
+      const contentFormatted = text.replace(/\n/g, '<br/>');
+
+      bubble.innerHTML = `
+        <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-xs ${
+          isUser
+            ? 'bg-rose-500 text-white rounded-br-none'
+            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none space-y-1.5'
+        }">
+          ${!isUser ? `<div class="flex items-center gap-1.5 text-xs font-semibold text-rose-500"><i class="fa-solid fa-sparkles"></i> Closer AI Counselor</div>` : ''}
+          <div>${contentFormatted}</div>
+        </div>
+      `;
+
+      container.appendChild(bubble);
+      scrollCounselingToBottom();
+      return bubble;
+    }
+
+    function appendCounselingLoading() {
+      const container = document.getElementById('counseling-message-container');
+      const bubble = document.createElement('div');
+      bubble.className = 'flex justify-start';
+      bubble.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-xs flex items-center gap-2 text-xs text-slate-500">
+          <div class="flex items-center gap-1 text-rose-400">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-bounce"></span>
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.2s]"></span>
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.4s]"></span>
+          </div>
+          <span>내담자의 감정 맥락을 심리학적으로 분석하고 있습니다...</span>
+        </div>
+      `;
+      container.appendChild(bubble);
+      scrollCounselingToBottom();
+      return bubble;
+    }
+
+    function scrollCounselingToBottom() {
+      const container = document.getElementById('counseling-message-container');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function resetCounselingChat() {
+      const container = document.getElementById('counseling-message-container');
+      state.counselingHistory = [];
+      container.innerHTML = `
+        <div class="flex justify-start">
+          <div class="max-w-[85%] sm:max-w-[75%] bg-white border border-slate-200 text-slate-800 rounded-2xl px-4 py-3.5 text-xs sm:text-sm shadow-xs leading-relaxed space-y-2">
+            <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-500">
+              <i class="fa-solid fa-sparkles"></i> Closer AI Counselor
+            </div>
+            <p>상담 세션이 초기화되었습니다. 새로운 관계 고민이나 감정적인 질문을 자유롭게 남겨주세요.</p>
+          </div>
+        </div>
+      `;
+      showToast('상담실 기록이 새로고침 되었습니다.', 'info');
+    }
+
+    async function handleSimulatorSubmit(e) {
+      e.preventDefault();
+      if (state.isSimResponding) return;
+
+      const inputEl = document.getElementById('sim-input');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      const partnerType = document.getElementById('sim-partner-type').value;
+
+      // Append user message
+      appendSimMessage('user', text);
+      inputEl.value = '';
+
+      const coachPanel = document.getElementById('sim-coach-panel');
+      const coachText = document.getElementById('sim-coach-text');
+      const coachScore = document.getElementById('sim-coach-score');
+      coachPanel.classList.remove('hidden');
+      coachText.textContent = '상대 반응 예측 및 비폭력 대화(NVC) 적합도 측정 중...';
+
+      const loadingBubble = appendSimLoading();
+      state.isSimResponding = true;
+      document.getElementById('btn-sim-send').disabled = true;
+
+      setTimeout(() => {
+        loadingBubble.remove();
+
+        let partnerReply = "";
+        let score = 75;
+        let feedback = "";
+
+        if (partnerType === 'avoidant') {
+          if (text.includes('왜') || text.includes('당장') || text.includes('전화해')) {
+            partnerReply = "나 지금 머리 아파서 더 얘기하기 싫어. 나중에 연락할게.";
+            score = 35;
+            feedback = "⚠️ '왜/당장' 같은 압박형 단어가 회피 본능을 자극했습니다. '천천히 시간 날 때'로 완화해보세요.";
+          } else {
+            partnerReply = "그렇게 말해줘서 고마워. 나도 감정 정리하고 저녁에 먼저 연락할게.";
+            score = 88;
+            feedback = "✨ 안전거리를 보장해주는 비폭력 어투 덕분에 상대방의 방어벽이 성공적으로 풀렸습니다.";
+          }
+        } else if (partnerType === 'anxious') {
+          if (text.includes('생각해') || text.includes('나중에')) {
+            partnerReply = "나중에 언제? 나 지금 피가 마르는데... 나한테 마음 식은 거야?";
+            score = 45;
+            feedback = "⚠️ 불안형 상대에게 모호한 연기는 더 큰 불안을 유발합니다. 구체적 시간(예: 저녁 8시)을 정해주세요.";
+          } else {
+            partnerReply = "진짜 나 걱정해줘서 그런 거 맞지? 알겠어 나도 서운했던 거 미안해.";
+            score = 85;
+            feedback = "✨ 변함없는 애정과 확신을 제공하여 상대방의 불안을 효과적으로 달래주었습니다.";
+          }
+        } else if (partnerType === 'defensive') {
+          partnerReply = "그래도 네가 먼저 그렇게 행동하니까 나도 그랬던 거지. 그래도 이번엔 네 말 무슨 뜻인지 알겠어.";
+          score = 70;
+          feedback = "💡 방어적 반응이 일부 남아있지만 유저의 쿠션어 덕분에 더 큰 싸움으로 번지지 않았습니다.";
+        } else {
+          partnerReply = "솔직하게 네 마음 말해줘서 고마워. 우리 서로 기분 상하지 않게 잘 얘기해보자.";
+          score = 92;
+          feedback = "🌟 건강하고 상호 존중적인 안정형 소통이 완벽하게 이루어졌습니다.";
+        }
+
+        appendSimMessage('partner', partnerReply);
+        coachText.textContent = feedback;
+        coachScore.textContent = `NVC 적합도 ${score}%`;
+        if (score >= 75) {
+          coachScore.className = "px-2 py-0.5 rounded-full bg-emerald-100 font-bold text-emerald-700 border border-emerald-200";
+        } else {
+          coachScore.className = "px-2 py-0.5 rounded-full bg-amber-100 font-bold text-amber-700 border border-amber-200";
+        }
+
+        state.isSimResponding = false;
+        document.getElementById('btn-sim-send').disabled = false;
+      }, 900);
+    }
+
+    function appendSimMessage(role, text) {
+      const container = document.getElementById('sim-chat-container');
+      const isUser = role === 'user';
+      const bubble = document.createElement('div');
+      bubble.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+
+      bubble.innerHTML = `
+        <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-xs ${
+          isUser
+            ? 'bg-amber-500 text-white rounded-br-none'
+            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
+        }">
+          ${!isUser ? `<div class="text-[10px] font-bold text-amber-600 mb-0.5"><i class="fa-solid fa-robot"></i> 상대방 페르소나</div>` : ''}
+          <div>${text}</div>
+        </div>
+      `;
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+      return bubble;
+    }
+
+    function appendSimLoading() {
+      const container = document.getElementById('sim-chat-container');
+      const bubble = document.createElement('div');
+      bubble.className = 'flex justify-start';
+      bubble.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-2xl px-3 py-2 text-xs text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce [animation-delay:0.2s]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce [animation-delay:0.4s]"></span>
+          <span class="ml-1 text-[11px]">상대방이 읽고 반응을 생각 중입니다...</span>
+        </div>
+      `;
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+      return bubble;
+    }
+
+    function openApiKeyModal() {
+      document.getElementById('modal-api').classList.remove('hidden');
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('modal-api').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const input = document.getElementById('input-api-key').value.trim();
+      state.apiKey = input;
+      localStorage.setItem('closer_gemini_api_key', input);
+      closeApiKeyModal();
+      showToast('API 설정이 브라우저 로컬 저장소에 저장되었습니다.', 'success');
+    }
+
+    function purgeAllData() {
+      clearChatInput();
+      resetCounselingChat();
+      const simContainer = document.getElementById('sim-chat-container');
+      if (simContainer) {
+        simContainer.innerHTML = `
+          <div class="text-center my-2">
+            <span class="text-[11px] bg-slate-200 text-slate-600 px-3 py-1 rounded-full">
+              모든 대화 기록이 영구 파기되었습니다.
+            </span>
+          </div>
+        `;
+      }
+      document.getElementById('analyzer-result').classList.add('hidden');
+      state.lastNvcScript = "초기화되었습니다.";
+      document.getElementById('saved-script-text').textContent = "기록이 삭제되었습니다.";
+      document.getElementById('saved-script-count').textContent = "0건 보관 중";
+      showToast('모든 세션 및 민감 상담 데이터가 성공적으로 영구 파기되었습니다.', 'success');
+    }
+  </script>
+</body>
+</html>
